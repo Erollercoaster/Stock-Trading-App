@@ -1,0 +1,35 @@
+<div class="flex justify-center items-center min-h-screen bg-gray-100">
+  <div class="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
+    <h1 class="text-3xl font-bold text-center mb-6">Stock Details</h1>
+
+    <!-- Stock Symbol and Current Value -->
+    <div class="mb-4">
+      <h2 class="text-2xl font-semibold text-gray-800">
+        <%= @stock.symbol %> - <span class="text-blue-500">Current Value: $<%= @stock.stock_value %></span>
+      </h2>
+    </div>
+
+    <!-- Additional Stock Details (if applicable) -->
+    <div class="mb-4">
+      <p class="text-lg text-gray-700">
+        <strong>Volume:</strong> <%= @stock.volume || "Not Available" %>
+      </p>
+      <p class="text-lg text-gray-700">
+        <strong>Available Stock:</strong> <%= @stock.available_stocks || "Not Available" %>
+      </p>
+    </div>
+
+
+    <!-- Flash Alert for Errors or Notices -->
+    <% if flash[:alert] %>
+      <div class="mt-4 text-center text-red-500">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+    <% if flash[:notice] %>
+      <div class="mt-4 text-center text-green-500">
+        <%= flash[:notice] %>
+      </div>
+    <% end %>
+  </div>
+</div>

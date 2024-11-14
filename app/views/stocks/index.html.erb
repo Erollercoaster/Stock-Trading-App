@@ -1,0 +1,42 @@
+<div class="flex justify-center items-center min-h-screen bg-gray-100">
+  <div class="w-full max-w-2xl p-6 bg-white shadow-md rounded-lg">
+    <h1 class="text-2xl font-bold text-center mb-6">Stock Search</h1>
+
+    <%= form_with url: stocks_path, method: :get, local: true do |f| %>
+      <div class="mb-4">
+        <%= f.label :symbol, "Enter Stock Symbol:", class: "block text-gray-700 font-semibold mb-2" %>
+        <%= f.text_field :symbol, placeholder: "e.g., MSFT, AAPL", required: true, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+      <div>
+        <%= f.submit "Search", class: "w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition duration-200" %>
+      </div>
+    <% end %>
+<% if @stock %>
+  <%= link_to stock_path(symbol: @stock.symbol), class: "block mt-6 p-4 rounded-lg hover:bg-gray-100 transition duration-200", title: "Click to view details for #{@stock.symbol}" do %>
+    <div class="flex flex-row justify-between space-x-4">
+      <div class="text-center">
+        <p class="text-gray-500 font-semibold">Stock</p>
+        <h2 class="text-xl font-semibold text-gray-800"><%= @stock.symbol %></h2>
+      </div>
+      
+      <div class="text-center">
+        <p class="text-gray-500 font-semibold">Latest Open Value</p>
+        <p class="text-gray-700 font-semibold">$<%= @stock.stock_value %></p>
+      </div>
+      
+      <div class="text-center">
+        <p class="text-gray-500 font-semibold">Volume</p>
+        <p class="text-gray-700 font-semibold"><%= @stock.volume %></p>
+      </div>
+      
+      <div class="text-center">
+        <p class="text-gray-500 font-semibold">Available Stock</p>
+        <p class="text-green-400 font-semibold"><%= @stock.available_stocks %></p>
+      </div>
+    </div>
+  <% end %>
+<% elsif flash[:alert] %>
+  <p class="mt-6 text-center text-gray-600"><%= flash[:alert] %></p>
+<% end %>
+  </div>
+</div>

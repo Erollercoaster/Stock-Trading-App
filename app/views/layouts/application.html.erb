@@ -12,8 +12,13 @@
   </head>
 
   <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+    <main>
       <%= yield %>
     </main>
+
+    <% unless current_page?(new_user_session_path) || current_page?(new_user_registration_path)%>
+    <%= render 'layouts/sidebar' %>
+  <% end %>
+
   </body>
 </html>
