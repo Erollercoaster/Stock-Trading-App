@@ -1,35 +1,120 @@
-<div class="flex justify-center items-center min-h-screen bg-gray-100">
-  <div class="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
-    <h1 class="text-3xl font-bold text-center mb-6">Stock Details</h1>
-
-    <!-- Stock Symbol and Current Value -->
-    <div class="mb-4">
-      <h2 class="text-2xl font-semibold text-gray-800">
-        <%= @stock.symbol %> - <span class="text-blue-500">Current Value: $<%= @stock.stock_value %></span>
-      </h2>
-    </div>
-
-    <!-- Additional Stock Details (if applicable) -->
-    <div class="mb-4">
-      <p class="text-lg text-gray-700">
-        <strong>Volume:</strong> <%= @stock.volume || "Not Available" %>
-      </p>
-      <p class="text-lg text-gray-700">
-        <strong>Available Stock:</strong> <%= @stock.available_stocks || "Not Available" %>
-      </p>
-    </div>
-
-
-    <!-- Flash Alert for Errors or Notices -->
-    <% if flash[:alert] %>
-      <div class="mt-4 text-center text-red-500">
-        <%= flash[:alert] %>
-      </div>
-    <% end %>
-    <% if flash[:notice] %>
-      <div class="mt-4 text-center text-green-500">
-        <%= flash[:notice] %>
-      </div>
-    <% end %>
+<div class="flex flex-col min-h-screen">
+  <!-- Main content -->
+  <div class="flex flex-1 p-4 gap-4">
+    <!-- Left side: Stock Info and Recent Transactions -->
+    <div class="flex-1 space-y-4">
+      <!-- Stock Info -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+  <div class="bg-white p-4 text-black border-b">
+    <h2 class="text-2xl font-bold"><%= @stock.symbol %></h2>
+    <p class="text-sm opacity-80">Stock Information</p>
   </div>
+  <div class="p-6">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="col-span-2">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-600">Current Value</span>
+          <span class="text-2xl font-bold text-black">$<%= number_with_precision(@stock.stock_value, precision: 2) %></span>
+        </div>
+      </div>
+      <div>
+        <span class="text-gray-600">Volume</span>
+        <div class="mt-1 flex items-center">
+          <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+          <span class="text-lg font-semibold"><%= number_with_delimiter(@stock.volume) %></span>
+        </div>
+      </div>
+      <div>
+        <span class="text-gray-600">Available Stocks</span>
+        <div class="mt-1 flex items-center">
+          <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+          <span class="text-lg font-semibold"><%= number_with_delimiter(@stock.available_stocks) %></span>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6">
+      <button class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200">
+        Add to Watchlist
+      </button>
+    </div>
+  </div>
+</div>
+
+      <!-- Recent Transactions -->
+      <div class="bg-white rounded-lg shadow-md">
+        <div class="p-4 border-b">
+          <h2 class="text-lg font-semibold">Recent Transactions</h2>
+        </div>
+        <div class="p-4">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr>
+                  <th class="text-left p-2">User</th>
+                  <th class="text-left p-2">Quantity</th>
+                  <th class="text-left p-2">Price</th>
+                  <th class="text-left p-2">Type</th>
+                  <th class="text-left p-2">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @stock.transactions.order(created_at: :desc).limit(5).each do |transaction| %>
+                  <tr class="border-t">
+                    <td class="p-2"><%= transaction.user.email %></td>
+                    <td class="p-2"><%= transaction.quantity %></td>
+                    <td class="p-2">$<%= number_with_precision(transaction.stock_value, precision: 2) %></td>
+                    <td class="p-2"><%= transaction.sold ? 'Sell' : 'Buy' %></td>
+                    <td class="p-2"><%= transaction.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side: Buy/Sell Section -->
+<div class="w-80 bg-white rounded-lg shadow-md">
+  <div class="p-4 border-b">
+    <h2 class="text-lg font-semibold">Trade <%= @stock.symbol %></h2>
+  </div>
+  <div class="p-4 space-y-6">
+    <!-- Buy Form -->
+    <div>
+      <h3 class="text-md font-semibold mb-2 text-blue-600">Buy Stocks</h3>
+      <%= form_with(method: :post, local: true, class: "space-y-4") do |f| %>
+        <div class="space-y-2">
+          <%= f.label :quantity, "Quantity to Buy", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.number_field :quantity, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50", placeholder: "Enter quantity", min: 1 %>
+        </div>
+        <div class="space-y-2">
+          <p class="block text-sm font-medium text-gray-700">Current Buy Price: <span class="font-semibold text-blue-600">$<%= number_with_precision(@stock.stock_value, precision: 2) %></span></p>
+        </div>
+        <%= f.submit "Buy", class: "w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200" %>
+      <% end %>
+    </div>
+
+    <div class="border-t border-gray-200 my-4"></div>
+
+    <!-- Sell Form -->
+    <div>
+      <h3 class="text-md font-semibold mb-2 text-red-600">Sell Stocks</h3>
+      <%= form_with(method: :post, local: true, class: "space-y-4") do |f| %>
+        <div class="space-y-2">
+          <%= f.label :quantity, "Quantity to Sell", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.number_field :quantity, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50", placeholder: "Enter quantity", min: 1 %>
+        </div>
+        <div class="space-y-2">
+          <p class="block text-sm font-medium text-gray-700">Current Sell Price: <span class="font-semibold text-red-600">$<%= number_with_precision(@stock.stock_value, precision: 2) %></span></p>
+        </div>
+        <%= f.submit "Sell", class: "w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-200" %>
+      <% end %>
+    </div>
+  </div>
+</div>
 </div>
