@@ -60,9 +60,11 @@
               <tbody>
                 <% @recent_transactions.each do |transaction| %>
                   <tr class="border-t">
-                    <td class="p-2"><%= transaction.user.email %></td>
+                    <td class="p-2">User <%= transaction.user_id %></td>
                     <td class="p-2"><%= transaction.quantity %></td>
-                    <td class="p-2">$<%= number_with_precision(transaction.stock_value, precision: 2) %></td>
+                    <td class="p-2">
+                    $<%= transaction.sold ? number_with_precision(@stock.stock_value, precision: 2) : number_with_precision(transaction.purchase_price, precision: 2) %>
+                  </td>
                     <td class="p-2"><%= transaction.sold ? 'Sell' : 'Buy' %></td>
                     <td class="p-2"><%= transaction.created_at.strftime("%Y-%m-%d %H:%M") %></td>
                   </tr>
@@ -112,10 +114,15 @@
             <%= f.hidden_field :stock_id, value: @stock.id %>
             <div class="space-y-2">
               <%= f.label :quantity, "Quantity to Sell", class: "block text-sm font-medium text-gray-700" %>
-              <%= f.number_field :quantity, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50", placeholder: "Enter quantity", min: 1, max: @user_stock_quantity %>
+              <%= f.number_field :quantity, id: "sell-quantity", data: {
+                    purchase_price: @transaction.purchase_price,
+                    current_value: @stock.stock_value
+                  }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50", placeholder: "Enter quantity", min: 1, max: @user_stock_quantity %>
             </div>
             <div class="space-y-2">
-              <p class="block text-sm font-medium text-gray-700">Current Sell Price: <span class="font-semibold text-red-600">$<%= number_with_precision(@stock.stock_value, precision: 2) %></span></p>
+              <p class="block text-sm font-medium text-gray-700">
+                Current Sell Price: <span class="font-semibold text-red-600">$<%= number_with_precision(@stock.stock_value, precision: 2) %></span>
+              </p>
             </div>
             <%= f.submit "Sell", class: "w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-200" %>
           <% end %>

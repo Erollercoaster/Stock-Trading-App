@@ -11,18 +11,18 @@
   </head>
 
   <body class="bg-gray-100 h-screen">
-    <div id="toast-container" class="fixed top-4 right-4 z-50">
-      <% flash.each do |type, msg| %>
-        <div class="toast shadow-lg rounded-lg p-4 mb-4 flex items-center justify-between transition-all duration-300 opacity-100 <%= type == 'notice' ? 'bg-green-500' : 'bg-red-500' %>">
-          <div class="text-white font-medium">
-            <%= msg %>
-          </div>
-          <button class="text-white hover:text-gray-200 focus:outline-none ml-3" onclick="closeToast(this.parentElement)">
-            &times;
-          </button>
-        </div>
-      <% end %>
+  <div id="toast-container" class="fixed top-4 right-4 z-50">
+  <% flash.each do |type, msg| %>
+    <div class="toast shadow-lg rounded-lg p-4 mb-4 flex items-center justify-between transition-all duration-300 opacity-100 <%= type == 'notice' ? 'bg-green-500' : 'bg-red-500' %>">
+      <div class="text-white font-medium">
+        <%= msg %>
+      </div>
+      <button class="text-white hover:text-gray-200 focus:outline-none ml-3" onclick="closeToast(this.closest('.toast'))">
+        &times;
+      </button>
     </div>
+  <% end %>
+</div>
 
     <div class="flex min-h-screen">
       <% unless current_page?(new_user_session_path) || current_page?(new_user_registration_path) %>
