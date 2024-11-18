@@ -16,4 +16,6 @@ Rails.application.routes.draw do
       post 'sell'
     end
   end
+
+  resource :portfolios, only: [:show]
 end

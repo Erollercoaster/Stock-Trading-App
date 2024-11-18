@@ -50,26 +50,42 @@
             <table class="w-full">
               <thead>
                 <tr>
-                  <th class="text-left p-2">User</th>
-                  <th class="text-left p-2">Quantity</th>
-                  <th class="text-left p-2">Price</th>
-                  <th class="text-left p-2">Type</th>
-                  <th class="text-left p-2">Date</th>
+                <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
-              <tbody>
-                <% @recent_transactions.each do |transaction| %>
-                  <tr class="border-t">
-                    <td class="p-2">User <%= transaction.user_id %></td>
-                    <td class="p-2"><%= transaction.quantity %></td>
-                    <td class="p-2">
-                    $<%= transaction.sold ? number_with_precision(@stock.stock_value, precision: 2) : number_with_precision(transaction.purchase_price, precision: 2) %>
-                  </td>
-                    <td class="p-2"><%= transaction.sold ? 'Sell' : 'Buy' %></td>
-                    <td class="p-2"><%= transaction.created_at.strftime("%Y-%m-%d %H:%M") %></td>
-                  </tr>
+              <tbody class="bg-white divide-y divide-gray-200">
+          <% @recent_transactions.each do |transaction| %>
+            <tr class="border-t">
+              <td class="p-2 text-sm font-medium text-gray-900">
+                User <%= transaction.user_id %>
+              </td>
+              <td class="p-2 text-sm text-gray-500">
+                <%= transaction.quantity %>
+              </td>
+              <td class="p-2 text-sm text-gray-500">
+                $<%= transaction.sold ? number_with_precision(@stock.stock_value, precision: 2) : number_with_precision(transaction.purchase_price, precision: 2) %>
+              </td>
+              <td class="p-2 text-sm">
+                <% if transaction.sold %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    Sell
+                  </span>
+                <% else %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Buy
+                  </span>
                 <% end %>
-              </tbody>
+              </td>
+              <td class="p-2 text-sm text-gray-500">
+                <%= transaction.created_at.strftime("%Y-%m-%d %H:%M") %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
             </table>
           </div>
         </div>
