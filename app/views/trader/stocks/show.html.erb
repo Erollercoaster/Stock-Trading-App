@@ -52,40 +52,48 @@
                 <tr>
                 <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                 <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Purchase Price</th>
+                <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Price Sold</th>
                 <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th class="text-left p-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-          <% @recent_transactions.each do |transaction| %>
-            <tr class="border-t">
-              <td class="p-2 text-sm font-medium text-gray-900">
-                User <%= transaction.user_id %>
-              </td>
-              <td class="p-2 text-sm text-gray-500">
-                <%= transaction.quantity %>
-              </td>
-              <td class="p-2 text-sm text-gray-500">
-                $<%= transaction.sold ? number_with_precision(@stock.stock_value, precision: 2) : number_with_precision(transaction.purchase_price, precision: 2) %>
-              </td>
-              <td class="p-2 text-sm">
-                <% if transaction.sold %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                    Sell
-                  </span>
-                <% else %>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Buy
-                  </span>
+                <% @recent_transactions.each do |transaction| %>
+                  <tr class="border-t">
+                    <td class="p-2 text-sm font-medium text-gray-900">
+                      User <%= transaction.user_id %>
+                    </td>
+                    <td class="p-2 text-sm text-gray-500">
+                      <%= transaction.quantity %>
+                    </td>
+                    <td class="p-2 text-sm text-gray-500">
+                      $<%= number_with_precision(transaction.purchase_price, precision: 2) %>
+                    </td>
+                    <td class="p-2 text-sm text-gray-500">
+                      <% if transaction.sold %>
+                        $<%= number_with_precision(transaction.stock_value, precision: 2) %>
+                      <% else %>
+                        -- <!-- Or you could leave it blank or show 'N/A' if not sold -->
+                      <% end %>
+                    </td>
+                    <td class="p-2 text-sm">
+                      <% if transaction.sold %>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                          Sell
+                        </span>
+                      <% else %>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          Buy
+                        </span>
+                      <% end %>
+                    </td>
+                    <td class="p-2 text-sm text-gray-500">
+                      <%= transaction.created_at.strftime("%Y-%m-%d %H:%M") %>
+                    </td>
+                  </tr>
                 <% end %>
-              </td>
-              <td class="p-2 text-sm text-gray-500">
-                <%= transaction.created_at.strftime("%Y-%m-%d %H:%M") %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
+              </tbody>
             </table>
           </div>
         </div>
@@ -109,7 +117,7 @@
 
         <div>
           <h3 class="text-md font-semibold mb-2 text-blue-600">Buy Stocks</h3>
-          <%= form_with(model: @transaction, url: buy_transactions_path, method: :post, local: true, class: "space-y-4") do |f| %>
+          <%= form_with(model: @transaction, url: buy_trader_transactions_path, method: :post, local: true, class: "space-y-4") do |f| %>
             <%= f.hidden_field :stock_id, value: @stock.id %>
             <div class="space-y-2">
               <%= f.label :quantity, "Quantity to Buy", class: "block text-sm font-medium text-gray-700" %>
@@ -126,7 +134,7 @@
 
         <div>
           <h3 class="text-md font-semibold mb-2 text-red-600">Sell Stocks</h3>
-          <%= form_with(model: @transaction, url: sell_transactions_path, method: :post, local: true, class: "space-y-4") do |f| %>
+          <%= form_with(model: @transaction, url: sell_trader_transactions_path, method: :post, local: true, class: "space-y-4") do |f| %>
             <%= f.hidden_field :stock_id, value: @stock.id %>
             <div class="space-y-2">
               <%= f.label :quantity, "Quantity to Sell", class: "block text-sm font-medium text-gray-700" %>

@@ -10,9 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_18_194419) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_21_084611) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "portfolios", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_portfolios_on_user_id"
+  end
 
   create_table "stocks", force: :cascade do |t|
     t.string "symbol"
@@ -47,10 +54,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_18_194419) do
     t.boolean "is_admin", default: false
     t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
     t.boolean "approved", default: false
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string "unconfirmed_email"
+    t.boolean "pending", default: true, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "transactions", "stocks"
-  add_foreign_key "transactions", "users"
+  add_foreign_key "portfolios", "users"
+  add_foreign_key "transactions", "stocks", on_delete: :cascade
+  add_foreign_key "transactions", "users", on_delete: :cascade
 end

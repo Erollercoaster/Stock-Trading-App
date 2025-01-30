@@ -1,12 +1,12 @@
-class TransactionsController < ApplicationController
+class Trader::TransactionsController < Trader::BaseController
   before_action :authenticate_user!
   before_action :set_stock, only: [:buy, :sell]
 
   def index
     @transactions = current_user.transactions.order(created_at: :desc)
     @transactions_stock = current_user.transactions.includes(:stock).order(created_at: :desc)
-    @total_bought = current_user.transactions.where(sold: false).sum('quantity * stock_value')
-    @total_sold = current_user.transactions.where(sold: true).sum('quantity * stock_value')
+    @total_bought = current_user.transactions.bought.sum('quantity * stock_value')
+    @total_sold = current_user.transactions.sold.sum('quantity * stock_value')
   end
 
   def show
@@ -15,6 +15,12 @@ class TransactionsController < ApplicationController
 
   def buy
     @quantity = transaction_params[:quantity].to_i
+
+    if @quantity <= 0
+      redirect_to trader_stock_path(@stock), alert: "Please enter a valid quantity greater than 0."
+      return
+    end
+    
     total_cost = @stock.stock_value * @quantity
 
     if current_user.balance >= total_cost
@@ -33,13 +39,13 @@ class TransactionsController < ApplicationController
             available_stocks: @stock.available_stocks - @quantity,
             volume: @stock.volume + @quantity
           )
-          redirect_to @stock, notice: "Successfully purchased #{@quantity} shares of #{@stock.symbol}."
+          redirect_to trader_stock_path(@stock), notice: "Successfully purchased #{@quantity} shares of #{@stock.symbol}."
         else
           render :new, alert: "There was an error in your transaction."
         end
       end
     else
-      redirect_to @stock, alert: "Insufficient balance for this purchase."
+      redirect_to trader_stock_path(@stock), alert: "Insufficient balance for this purchase."
     end
   end
 
@@ -59,10 +65,12 @@ class TransactionsController < ApplicationController
   
       ActiveRecord::Base.transaction do
         user_transactions.each do |transaction|
+          #Whole-sale
           if transaction.quantity <= remaining_quantity
             total_sale_value += transaction.quantity * @stock.stock_value
             transaction.update!(sold: true)
             remaining_quantity -= transaction.quantity
+            #Partial Sale
           else
             total_sale_value += remaining_quantity * @stock.stock_value
             transaction.update!(quantity: transaction.quantity - remaining_quantity)
@@ -87,10 +95,10 @@ class TransactionsController < ApplicationController
           volume: @stock.volume + quantity_to_sell
         )
   
-        redirect_to @stock, notice: "Successfully sold #{quantity_to_sell} shares of #{@stock.symbol}."
+        redirect_to trader_stock_path(@stock), notice: "Successfully sold #{quantity_to_sell} shares of #{@stock.symbol}."
       end
     else
-      redirect_to @stock, alert: "You do not have enough shares to sell."
+      redirect_to trader_stock_path(@stock), alert: "You do not have enough shares to sell."
     end
   end
   

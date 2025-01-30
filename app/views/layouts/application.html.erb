@@ -11,25 +11,31 @@
   </head>
 
   <body class="bg-gray-100 h-screen">
-  <div id="toast-container" class="fixed top-4 right-4 z-50">
-  <% flash.each do |type, msg| %>
-    <div class="toast shadow-lg rounded-lg p-4 mb-4 flex items-center justify-between transition-all duration-300 opacity-100 <%= type == 'notice' ? 'bg-green-500' : 'bg-red-500' %>">
-      <div class="text-white font-medium">
-        <%= msg %>
+    <div id="toast-container" class="fixed top-4 right-4 z-50">
+      <% flash.each do |type, msg| %>
+        <div class="toast shadow-lg rounded-lg p-4 mb-4 flex items-center justify-between transition-all duration-300 opacity-100 <%= type == 'notice' ? 'bg-green-500' : 'bg-red-500' %>">
+          <div class="text-white font-medium">
+            <%= msg %>
+        </div>
+        <button class="text-white hover:text-gray-200 focus:outline-none ml-3" onclick="closeToast(this.closest('.toast'))">
+          &times;
+        </button>
       </div>
-      <button class="text-white hover:text-gray-200 focus:outline-none ml-3" onclick="closeToast(this.closest('.toast'))">
-        &times;
-      </button>
-    </div>
-  <% end %>
+    <% end %>
 </div>
 
-    <div class="flex min-h-screen">
-      <% unless current_page?(new_user_session_path) || current_page?(new_user_registration_path) %>
-        <div class="w-64 bg-gray-800 text-white">
-          <%= render 'layouts/sidebar' %>
-        </div>
-      <% end %>
+     <div class="flex min-h-screen">
+        <% unless devise_controller? %>
+          <div class="w-64 bg-gray-800 text-white hidden sm:block">
+            <% if current_user.present? %>
+              <% if current_user.admin? %>  
+                <%= render 'layouts/admin_sidebar' %>
+              <% elsif current_user.trader? %>
+                <%= render 'layouts/trader_sidebar' %>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
 
       <div class="flex-grow">
         <%= yield %>

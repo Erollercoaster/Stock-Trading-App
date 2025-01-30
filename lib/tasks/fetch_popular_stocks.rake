@@ -6,7 +6,6 @@ namespace :stocks do
   
       symbols.each do |symbol|
         data = api.time_series_intraday(symbol)
-        puts "Data for #{symbol}: #{data.inspect}"
         next unless data && data['Time Series (5min)']
   
         first_open_value = data['Time Series (5min)'].values.first['1. open'] rescue nil

@@ -8,14 +8,28 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root 'dashboard#index'
   
-  resources :stocks, param: :symbol, only: [:index, :show]
+  get 'pending_approval', to: 'static_pages#pending_approval', as: 'pending_approval'
 
-  resources :transactions, only: [:index, :show, :new] do
-    collection do
-      post 'buy'
-      post 'sell'
+  namespace :trader do
+    resource :portfolios, only: [:show]
+    resources :stocks, param: :symbol, only: [:index, :show]
+    resources :transactions, only: [:index, :show, :new] do
+      collection do
+        post 'buy'
+        post 'sell'
+      end
     end
   end
 
-  resource :portfolios, only: [:show]
+  namespace :admin do
+    resources :users, only: [:create, :index, :show, :new, :update, :edit, :destroy] do
+      collection do
+        get 'pending'
+      end
+      member do
+        patch 'approve'
+      end
+    end
+    resources :transactions, only: [:index]
+  end
 end

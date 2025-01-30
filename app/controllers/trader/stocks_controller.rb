@@ -1,14 +1,32 @@
-class StocksController < ApplicationController
+class Trader::StocksController < Trader::BaseController
   before_action :set_stock, only: [:show]
 
   def index
     if params[:symbol].present?
       @stock = Stock.find_by(symbol: params[:symbol].upcase)
-      flash.now[:alert] = "Stock symbol not found. Please try another." if @stock.nil?
+  
+      if @stock.nil?
+        api_service = AlphaVantageApi.new
+        api_result = api_service.time_series_intraday(params[:symbol].upcase)
+  
+        if api_result && api_result['Time Series (5min)']
+          latest_data = api_result['Time Series (5min)'].values.first
+          stock_price = latest_data['1. open'].to_f
+  
+          @stock = Stock.create(
+            symbol: params[:symbol].upcase,
+            stock_value: stock_price
+          )
+          flash.now[:notice] = "Stock added to the database with the latest value of $#{stock_price}."
+        else
+          flash.now[:alert] = "Stock symbol not found in the database or API. Please try another."
+        end
+      end
     end
+  
     @stocks = Stock.all
   end
-
+  
   def show
     if @stock
       if @stock.needs_update?
